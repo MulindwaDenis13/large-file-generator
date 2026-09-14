@@ -291,7 +291,7 @@
             try {
 
                 const response = await fetch(
-                    "/api/generate",
+                    "./api/generate",
                     {
                         method: "POST",
 
@@ -345,7 +345,7 @@
             try {
 
                 const response =
-                    await fetch("/api/files");
+                    await fetch("./api/files");
 
                 const files =
                     await response.json();
@@ -417,7 +417,7 @@
             }
 
             await fetch(
-                `/api/files/${filename}`,
+                `./api/files/${filename}`,
                 {
                     method: "DELETE"
                 }
