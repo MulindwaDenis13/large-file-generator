@@ -1,0 +1,447 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Large File Generator</title>
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 0;
+            font-family:
+                -apple-system,
+                BlinkMacSystemFont,
+                "Segoe UI",
+                Arial,
+                sans-serif;
+
+            background: #f4f6f8;
+            color: #1f2937;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 60px auto;
+            padding: 20px;
+        }
+
+        .header {
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0 0 8px;
+            font-size: 32px;
+        }
+
+        .header p {
+            margin: 0;
+            color: #6b7280;
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 25px;
+            margin-bottom: 20px;
+            box-shadow:
+                0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+
+        .sizes {
+            display: grid;
+            grid-template-columns:
+                repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .size-card {
+            border: 1px solid #e5e7eb;
+            border-radius: 10px;
+            padding: 20px;
+            text-align: center;
+        }
+
+        .size-card h2 {
+            margin: 0 0 8px;
+            font-size: 25px;
+        }
+
+        .size-card p {
+            color: #6b7280;
+            font-size: 14px;
+            margin-bottom: 18px;
+        }
+
+        button {
+            border: none;
+            border-radius: 7px;
+            padding: 11px 18px;
+            font-size: 14px;
+            cursor: pointer;
+            background: #2563eb;
+            color: white;
+        }
+
+        button:hover {
+            background: #1d4ed8;
+        }
+
+        button:disabled {
+            background: #9ca3af;
+            cursor: not-allowed;
+        }
+
+        .files {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .file {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 15px;
+        }
+
+        .file-info strong {
+            display: block;
+            margin-bottom: 4px;
+        }
+
+        .file-info span {
+            color: #6b7280;
+            font-size: 13px;
+        }
+
+        .file-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .delete {
+            background: #dc2626;
+        }
+
+        .delete:hover {
+            background: #b91c1c;
+        }
+
+        .download {
+            background: #059669;
+        }
+
+        .download:hover {
+            background: #047857;
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 7px;
+            background: #eff6ff;
+            color: #1e40af;
+            display: none;
+        }
+
+        .error {
+            background: #fef2f2;
+            color: #991b1b;
+        }
+
+        @media (max-width: 700px) {
+
+            .sizes {
+                grid-template-columns: 1fr;
+            }
+
+            .file {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 15px;
+            }
+
+        }
+    </style>
+
+</head>
+
+<body>
+
+    <div class="container">
+
+        <div class="header">
+
+            <h1>Large File Generator</h1>
+
+            <p>
+                Generate large text files for testing
+                downloads, uploads and file processing.
+            </p>
+
+        </div>
+
+
+        <!-- Generate -->
+
+        <div class="card">
+
+            <h2>Generate File</h2>
+
+            <div class="sizes">
+
+                <div class="size-card">
+
+                    <h2>1 GB</h2>
+
+                    <p>
+                        Generate a 1 GB text file
+                    </p>
+
+                    <button onclick="generateFile(1)" id="button-1">
+                        Generate
+                    </button>
+
+                </div>
+
+
+                <div class="size-card">
+
+                    <h2>2 GB</h2>
+
+                    <p>
+                        Generate a 2 GB text file
+                    </p>
+
+                    <button onclick="generateFile(2)" id="button-2">
+                        Generate
+                    </button>
+
+                </div>
+
+
+                <div class="size-card">
+
+                    <h2>3 GB</h2>
+
+                    <p>
+                        Generate a 3 GB text file
+                    </p>
+
+                    <button onclick="generateFile(3)" id="button-3">
+                        Generate
+                    </button>
+
+                </div>
+
+            </div>
+
+            <div id="status" class="status"></div>
+
+        </div>
+
+
+        <!-- Files -->
+
+        <div class="card">
+
+            <h2>Generated Files</h2>
+
+            <div id="files" class="files">
+
+                Loading...
+
+            </div>
+
+        </div>
+
+    </div>
+
+
+    <script>
+
+        async function generateFile(size) {
+
+            const button =
+                document.getElementById(`button-${size}`);
+
+            const status =
+                document.getElementById("status");
+
+            button.disabled = true;
+            button.textContent = "Generating...";
+
+            status.style.display = "block";
+            status.className = "status";
+
+            status.textContent =
+                `Generating ${size} GB file. Please wait...`;
+
+            try {
+
+                const response = await fetch(
+                    "/api/generate",
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            size
+                        })
+                    }
+                );
+
+                const data =
+                    await response.json();
+
+                if (!response.ok) {
+                    throw new Error(
+                        data.error || "Generation failed"
+                    );
+                }
+
+                status.textContent =
+                    `${data.filename} is ready for download.`;
+
+                await loadFiles();
+
+            } catch (error) {
+
+                status.className =
+                    "status error";
+
+                status.textContent =
+                    error.message;
+
+            } finally {
+
+                button.disabled = false;
+                button.textContent = "Generate";
+
+            }
+        }
+
+
+        async function loadFiles() {
+
+            const container =
+                document.getElementById("files");
+
+            try {
+
+                const response =
+                    await fetch("/api/files");
+
+                const files =
+                    await response.json();
+
+                if (files.length === 0) {
+
+                    container.innerHTML =
+                        "<p>No files generated yet.</p>";
+
+                    return;
+                }
+
+                container.innerHTML =
+                    files.map(file => `
+
+                <div class="file">
+
+                    <div class="file-info">
+
+                        <strong>
+                            ${escapeHtml(file.name)}
+                        </strong>
+
+                        <span>
+                            ${file.sizeGB} GB
+                        </span>
+
+                    </div>
+
+                    <div class="file-actions">
+
+                        <a
+                            href="${file.downloadUrl}"
+                            download
+                        >
+
+                            <button class="download">
+                                Download
+                            </button>
+
+                        </a>
+
+                        <button
+                            class="delete"
+                            onclick="deleteFile('${encodeURIComponent(file.name)}')"
+                        >
+                            Delete
+                        </button>
+
+                    </div>
+
+                </div>
+
+            `).join("");
+
+            } catch (error) {
+
+                container.innerHTML =
+                    `<p>Unable to load files.</p>`;
+
+            }
+        }
+
+
+        async function deleteFile(filename) {
+
+            if (!confirm("Delete this file?")) {
+                return;
+            }
+
+            await fetch(
+                `/api/files/${filename}`,
+                {
+                    method: "DELETE"
+                }
+            );
+
+            await loadFiles();
+        }
+
+
+        function escapeHtml(value) {
+
+            return String(value)
+                .replaceAll("&", "&amp;")
+                .replaceAll("<", "&lt;")
+                .replaceAll(">", "&gt;")
+                .replaceAll('"', "&quot;")
+                .replaceAll("'", "&#039;");
+        }
+
+
+        loadFiles();
+
+    </script>
+
+</body>
+
+</html>
