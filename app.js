@@ -13,6 +13,13 @@ if (!fs.existsSync(GENERATED_DIR)) {
     fs.mkdirSync(GENERATED_DIR, { recursive: true });
 }
 
+app.use((req, res, next) => {
+    if (req.url.startsWith("//")) {
+        req.url = req.url.replace(/^\/+/, "/");
+    }
+    next();
+});
+
 app.use(express.json());
 app.use(express.static(path.join(__dirname, "public")));
 
@@ -227,12 +234,12 @@ app.post("/api/generate", async (req, res) => {
 
                         const buffer =
                             currentSize ===
-                            chunkSize
+                                chunkSize
                                 ? chunk
                                 : Buffer.alloc(
-                                      currentSize,
-                                      "A"
-                                  );
+                                    currentSize,
+                                    "A"
+                                );
 
                         const canContinue =
                             stream.write(
